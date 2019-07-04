@@ -1,0 +1,15 @@
+<phpunit
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="/vendor/phpunit/phpunit/phpunit.xsd"
+        colors="true">
+    <testsuites>
+        <testsuite name="Core">
+            <file>EnvCheckerTest.php</file>
+        </testsuite>
+    </testsuites>
+    <filter>
+        <whitelist addUncoveredFilesFromWhitelist="true">
+            <directory>../src/</directory>
+        </whitelist>
+    </filter>
+</phpunit>
