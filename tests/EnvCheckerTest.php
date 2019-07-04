@@ -36,11 +36,4 @@ class EnvCheckerTest extends TestCase
         $checker = new EnvChecker($version);
         $checker->phpCheck();
     }
-
-    public function testPhpCheck()
-    {
-        $version = new MWVersion('1.33.0');
-        $checker = new EnvChecker($version);
-        $checker->phpCheck();
-    }
 }
