@@ -36,6 +36,13 @@ final class Kernel
 
     public function __construct()
     {
+        set_error_handler(function ($severity, $message, $file, $line) {
+            if (!(error_reporting() & $severity)) {
+                // This error code is not included in error_reporting
+                return;
+            }
+            throw new \ErrorException($message, 0, $severity, $file, $line);
+        });
         $this->app = new Application();
         $this->app->add(new PrepareEnvCheck);
     }
