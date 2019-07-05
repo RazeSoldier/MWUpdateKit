@@ -36,6 +36,7 @@ class HttpClient
     public function __construct()
     {
         $this->curlClient = new Curl;
+        $this->curlClient->setJsonDecoder(false); // Do not use the JSON decoder that comes with Curl\Curl
     }
 
     /**
