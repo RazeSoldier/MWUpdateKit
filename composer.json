@@ -17,5 +17,8 @@
     "psr-4": {
       "RazeSoldier\\MWUpKit\\": "src/"
     }
+  },
+  "scripts": {
+    "post-autoload-dump": "RazeSoldier\\MWUpKit\\ComposerExtraHandler::afterDumpAutoload"
   }
 }

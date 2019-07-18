@@ -25,7 +25,10 @@ use RazeSoldier\MWUpKit\MediaWiki\{
     ExtensionList
 };
 use RazeSoldier\MWUpKit\StatusValue;
-use Symfony\Component\Process\Process;
+use Symfony\Component\Process\{
+    Process,
+    PhpExecutableFinder
+};
 
 /**
  * This preparer uses cloning feature of Git to prepare for the extension
@@ -46,15 +49,23 @@ class ExtensionGitPreparer extends ExtensionPreparerBase
         foreach ($extList as $instance) {
             $this->output->writeln("> Cloning {$instance->getName()} from Github");
             if ($instance->getType() === ExtensionInstance::TYPE_EXTENSION) {
-                $res = $this->doGitClone($instance->getName(), $this->targetVersion->toBranch(), "{$this->dst}/extensions", 'extensions');
+                $pathPrefix = "{$this->dst}/extensions";
+                $res = $this->doGitClone($instance->getName(), $this->targetVersion->toBranch(), $pathPrefix, 'extensions');
             } else {
-                $res = $this->doGitClone($instance->getName(), $this->targetVersion->toBranch(), "{$this->dst}/skins", 'skins');
+                $pathPrefix = "{$this->dst}/skins";
+                $res = $this->doGitClone($instance->getName(), $this->targetVersion->toBranch(), $pathPrefix, 'skins');
             }
-            if ($res->getExitCode() === 0) {
-                $status->addSuccess($instance->getName());
-            } else {
+            if ($res->getExitCode() !== 0) {
                 $this->output->writeln("<error>{$res->getErrorOutput()}</error>");
-                $status->addFail($instance->getName());
+                $status->addFail("{$instance->getTypeText()}-{$instance->getName()}");
+                continue;
+            }
+
+            try {
+                $this->installDepend("$pathPrefix/{$instance->getName()}");
+            } catch (\RuntimeException $e) {
+                $this->output->writeln("<error>{$e->getMessage()}</error>");
+                $status->addFail("{$instance->getTypeText()}-{$instance->getName()}");
             }
         }
         return $status;
@@ -66,5 +77,37 @@ class ExtensionGitPreparer extends ExtensionPreparerBase
             '--branch', $branch, $repoName], $cwd, null, null, null);
         $process->run();
         return $process;
+    }
+
+    /**
+     * Install dependence for the extension via Composer
+     * @param string $path Path to the extension
+     * @throws \RuntimeException
+     */
+    private function installDepend(string $path)
+    {
+        // If composer.json doesn't exist or the composer.json doesn't contain "require" key,
+        // exit this method directly.
+        if (!is_readable("$path/composer.json")) {
+            return;
+        }
+        $json = file_get_contents("$path/composer.json");
+        $json = json_decode($json, true);
+        if (!isset($json['require'])) {
+            return;
+        }
+
+        // Check if Composer binary exists in the $PATH and use it if it exists,
+        // or use the build-in binary if it doesn't exists.
+        if ((new Process('composer'))->run() === 0) {
+            $process = new Process(['composer', 'install', '--no-dev'], $path, null, null, null);
+        } else {
+            $phpPath = (new PhpExecutableFinder)->find();
+            $composerPath = ROOT_PATH . '/vendor/bin/composer.phar';
+            $process = new Process([$phpPath, $composerPath, 'install', '--no-dev'], $path, null, null, null);
+        }
+        if ($process->run() !== 0) {
+            throw new \RuntimeException("Exception: {$process->getErrorOutput()}");
+        }
     }
 }
