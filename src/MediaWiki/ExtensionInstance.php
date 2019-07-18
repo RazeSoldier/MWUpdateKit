@@ -30,6 +30,10 @@ class ExtensionInstance
 {
     const TYPE_EXTENSION = 5;
     const TYPE_SKIN = 6;
+    const TYPE_TEXT = [
+        5 => 'extensions',
+        6 => 'skins'
+    ];
 
     /**
      * @var string
@@ -90,6 +94,11 @@ class ExtensionInstance
     public function getType() : int
     {
         return $this->type;
+    }
+
+    public function getTypeText() : string
+    {
+        return self::TYPE_TEXT[$this->type];
     }
 
     public function getName() : string

@@ -91,7 +91,7 @@ abstract class ExtensionPreparerBase implements IExtensionPreparer
             if ($ext->isHostWMF()) {
                 $list[] = $ext;
             } else {
-                $text = $ext->getType() === ExtensionInstance::TYPE_EXTENSION ? 'extension' : 'skin';
+                $text = substr($ext->getTypeText(), 0, -1);
                 $this->output->writeln("<comment>'{$ext->getName()}' $text not hosting WMF-gerrit, ignore</comment>");
                 $status->addFail($ext->getName());
             }

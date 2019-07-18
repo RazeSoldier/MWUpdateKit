@@ -54,7 +54,7 @@ class ExtensionGeneralPreparer extends ExtensionPreparerBase
                 $this->output->writeln("<error>Exception: {$e->getMessage()}</error>");
                 continue;
             }
-            $typeText = $instance->getType() === ExtensionInstance::TYPE_EXTENSION ? 'extensions' : 'skins';
+            $typeText = $instance->getTypeText();
             $this->extractTarball($dst, "{$this->dst}/$typeText");
             $status->addSuccess("$typeText-{$instance->getName()}");
             unlink($dst);
@@ -77,7 +77,7 @@ class ExtensionGeneralPreparer extends ExtensionPreparerBase
         $url .= $type === ExtensionInstance::TYPE_EXTENSION ? "edbexts=$extName" : "edbskins=$extName";
         $json = $client->GET($url)->getBody();
         $json = json_decode($json, true);
-        $typeText = $type === ExtensionInstance::TYPE_EXTENSION ? 'extensions' : 'skins';
+        $typeText = ExtensionInstance::TYPE_TEXT[$type];
         return $json['query']['extdistbranches'][$typeText][$extName][$branchName];
     }
 
