@@ -3,8 +3,11 @@
         xsi:noNamespaceSchemaLocation="/vendor/phpunit/phpunit/phpunit.xsd"
         colors="true">
     <testsuites>
-        <testsuite name="Core">
+        <testsuite name="MediaWiki">
             <file>EnvCheckerTest.php</file>
+            <file>MediaWikiInstanceTest.php</file>
+            <file>ExtensionInstanceTest.php</file>
+            <file>ExtensionListTest.php</file>
         </testsuite>
     </testsuites>
     <filter>

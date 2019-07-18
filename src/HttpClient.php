@@ -21,6 +21,7 @@
 namespace RazeSoldier\MWUpKit;
 
 use Curl\Curl;
+use RazeSoldier\MWUpKit\Exception\HttpTimeoutException;
 
 /**
  * Used to access internet
@@ -40,6 +41,15 @@ class HttpClient
     }
 
     /**
+     * Set proxy
+     * @param string $proxy
+     */
+    public function setProxy(string $proxy)
+    {
+        $this->curlClient->setProxy($proxy);
+    }
+
+    /**
      * Send a GET Http request
      * @param string $url
      * @param array|null $headers
@@ -49,7 +59,49 @@ class HttpClient
     {
         $this->curlClient->setHeaders($headers);
         $this->curlClient->get($url);
+        $this->clearCurlClientStatus();
         return new HttpResponse($this->curlClient->getHttpStatusCode(), $this->curlClient->getResponseHeaders(),
             $this->curlClient->getResponse());
+    }
+
+    /**
+     * @param string $url
+     * @param string $filename
+     * @throws HttpTimeoutException Exception thrown if the timeout reached while HTTP connection
+     * @throws \RuntimeException Exception thrown if any error occurred while HTTP connection
+     */
+    public function download(string $url, string $filename)
+    {
+        $this->curlClient->setTimeout(300);
+        $res = $this->curlClient->download($url, $filename);
+        $this->curlClient->setDefaultTimeout();
+        if (!$res) {
+            // Handle timeout error
+            if ($this->curlClient->curlErrorCode === 28) {
+                $msg = $this->curlClient->curlErrorMessage;
+                $this->clearCurlClientStatus();
+                throw new HttpTimeoutException($url, $msg);
+            } else {
+                $msg = $this->curlClient->getErrorMessage();
+                $this->clearCurlClientStatus();
+                throw new \RuntimeException("Failed to download $url, $msg");
+            }
+        }
+    }
+
+    /**
+     * After send request, must call this method to clear the curl client status
+     */
+    private function clearCurlClientStatus()
+    {
+        $this->curlClient->error = false;
+        $this->curlClient->errorCode = 0;
+        $this->curlClient->errorMessage = null;
+        $this->curlClient->curlError = false;
+        $this->curlClient->curlErrorCode = 0;
+        $this->curlClient->curlErrorMessage = null;
+        $this->curlClient->httpError = false;
+        $this->curlClient->httpStatusCode = 0;
+        $this->curlClient->httpErrorMessage = null;
     }
 }

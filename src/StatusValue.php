@@ -145,6 +145,22 @@ class StatusValue {
     }
 
     /**
+     * @return bool[] (string => bool)
+     */
+    public function getSuccess() : array
+    {
+        return $this->success;
+    }
+
+    /**
+     * @return int
+     */
+    public function getSuccessCount() : int
+    {
+        return $this->successCount;
+    }
+
+    /**
      * Change operation status
      *
      * @param bool $ok

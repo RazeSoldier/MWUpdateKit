@@ -20,7 +20,10 @@
 
 namespace RazeSoldier\MWUpKit;
 
-use RazeSoldier\MWUpKit\Command\PrepareEnvCheck;
+use RazeSoldier\MWUpKit\Command\{
+    PrepareEnvCheck,
+    PrepareExtension
+};
 use Symfony\Component\Console\Application;
 
 /**
@@ -45,6 +48,7 @@ final class Kernel
         });
         $this->app = new Application();
         $this->app->add(new PrepareEnvCheck);
+        $this->app->add(new PrepareExtension);
     }
 
     public function run()
