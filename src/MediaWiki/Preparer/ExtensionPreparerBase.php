@@ -93,7 +93,7 @@ abstract class ExtensionPreparerBase implements IExtensionPreparer
             } else {
                 $text = substr($ext->getTypeText(), 0, -1);
                 $this->output->writeln("<comment>'{$ext->getName()}' $text not hosting WMF-gerrit, ignore</comment>");
-                $status->addFail($ext->getName());
+                $status->addFail("{$ext->getTypeText()}-{$ext->getName()}");
             }
         }
         if ($list === []) {
