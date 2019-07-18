@@ -46,9 +46,9 @@ class ExtensionGitPreparer extends ExtensionPreparerBase
         foreach ($extList as $instance) {
             $this->output->writeln("> Cloning {$instance->getName()} from Github");
             if ($instance->getType() === ExtensionInstance::TYPE_EXTENSION) {
-                $res = $this->doGitClone($instance->getName(), $this->targetVersion->toBranch(), "{$this->dst}/extensions");
+                $res = $this->doGitClone($instance->getName(), $this->targetVersion->toBranch(), "{$this->dst}/extensions", 'extensions');
             } else {
-                $res = $this->doGitClone($instance->getName(), $this->targetVersion->toBranch(), "{$this->dst}/skins");
+                $res = $this->doGitClone($instance->getName(), $this->targetVersion->toBranch(), "{$this->dst}/skins", 'skins');
             }
             if ($res->getExitCode() === 0) {
                 $status->addSuccess($instance->getName());
@@ -60,9 +60,9 @@ class ExtensionGitPreparer extends ExtensionPreparerBase
         return $status;
     }
 
-    private function doGitClone(string $repoName, string $branch, string $cwd) : Process
+    private function doGitClone(string $repoName, string $branch, string $cwd, string $type) : Process
     {
-        $process = new Process(['git', 'clone', "https://github.com/wikimedia/mediawiki-extensions-$repoName.git",
+        $process = new Process(['git', 'clone', "https://github.com/wikimedia/mediawiki-$type-$repoName.git",
             '--branch', $branch, $repoName], $cwd, null, null, null);
         $process->run();
         return $process;
