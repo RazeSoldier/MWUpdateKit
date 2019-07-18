@@ -50,7 +50,7 @@ class ExtensionGitPreparer extends ExtensionPreparerBase
             } else {
                 $res = $this->doGitClone($instance->getName(), $this->targetVersion->toBranch(), "{$this->dst}/skins");
             }
-            if ($res->getExitCode() === 200) {
+            if ($res->getExitCode() === 0) {
                 $status->addSuccess($instance->getName());
             } else {
                 $this->output->writeln("<error>{$res->getErrorOutput()}</error>");
