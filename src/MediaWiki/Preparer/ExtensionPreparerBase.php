@@ -21,7 +21,6 @@
 namespace RazeSoldier\MWUpKit\MediaWiki\Preparer;
 
 use RazeSoldier\MWUpKit\MediaWiki\{
-    ExtensionInstance,
     ExtensionList,
     MediaWikiInstance,
     MWVersion
