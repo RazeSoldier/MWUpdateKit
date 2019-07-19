@@ -59,9 +59,11 @@ class HttpClient
     {
         $this->curlClient->setHeaders($headers);
         $this->curlClient->get($url);
+        $statusCode = $this->curlClient->getHttpStatusCode();
+        $respHeaders = $this->curlClient->getResponseHeaders();
+        $body = $this->curlClient->getResponse();
         $this->clearCurlClientStatus();
-        return new HttpResponse($this->curlClient->getHttpStatusCode(), $this->curlClient->getResponseHeaders(),
-            $this->curlClient->getResponse());
+        return new HttpResponse($statusCode, $respHeaders, $body);
     }
 
     /**
