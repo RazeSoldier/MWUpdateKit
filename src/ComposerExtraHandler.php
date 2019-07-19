@@ -38,6 +38,10 @@ class ComposerExtraHandler
     public static function afterDumpAutoload()
     {
         $composerPath = __DIR__ . '/../vendor/bin/composer.phar';
+        if (!is_dir(__DIR__ . '/../vendor/bin/')) {
+            mkdir(__DIR__ . '/../vendor/bin/');
+        }
+
         if (is_readable($composerPath)) {
             $path = (new PhpExecutableFinder)->find();
             if ($path === false) {
