@@ -73,15 +73,15 @@ abstract class ExtensionPreparerBase implements IExtensionPreparer
             if (file_exists("{$this->dst}/extensions")) {
                 throw new \Exception("{$this->dst}/extensions already exist");
             }
-            mkdir("{$this->dst}/extensions", 0644);
+            mkdir("{$this->dst}/extensions", 0775);
             if (file_exists("{$this->dst}/skins")) {
                 throw new \Exception("{$this->dst}/skins already exist");
             }
-            mkdir("{$this->dst}/skins", 0644);
+            mkdir("{$this->dst}/skins", 0775);
         } else {
-            mkdir($this->dst, 0644, true);
-            mkdir("{$this->dst}/extensions", 0644);
-            mkdir("{$this->dst}/skins", 0644);
+            mkdir($this->dst, 0775, true);
+            mkdir("{$this->dst}/extensions", 0775);
+            mkdir("{$this->dst}/skins", 0775);
         }
     }
 
