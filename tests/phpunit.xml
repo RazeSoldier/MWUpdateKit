@@ -4,10 +4,7 @@
         colors="true">
     <testsuites>
         <testsuite name="MediaWiki">
-            <file>EnvCheckerTest.php</file>
-            <file>MediaWikiInstanceTest.php</file>
-            <file>ExtensionInstanceTest.php</file>
-            <file>ExtensionListTest.php</file>
+            <directory>.</directory>
         </testsuite>
     </testsuites>
     <filter>
