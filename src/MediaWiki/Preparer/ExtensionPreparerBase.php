@@ -103,7 +103,7 @@ abstract class ExtensionPreparerBase implements IExtensionPreparer
     /**
      * @return ExtensionList
      */
-    protected function getExtList() : ExtensionList
+    private function getExtList() : ExtensionList
     {
         return new ExtensionList($this->mwInstance->getExtensionList()->getList() + $this->mwInstance->getSkinList()->getList());
     }
