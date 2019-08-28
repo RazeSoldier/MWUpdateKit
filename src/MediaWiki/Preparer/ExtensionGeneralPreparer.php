@@ -24,8 +24,7 @@ use RazeSoldier\MWUpKit\{
     Exception\HttpTimeoutException,
     MediaWiki\ExtensionInstance,
     MediaWiki\ExtensionList,
-    Services,
-    StatusValue
+    Services
 };
 
 /**
@@ -34,13 +33,13 @@ use RazeSoldier\MWUpKit\{
  */
 class ExtensionGeneralPreparer extends ExtensionPreparerBase
 {
-    public function prepare() : StatusValue
+    public function prepare() : PrepareResult
     {
-        $status = new StatusValue;
+        $result = new PrepareResult;
         $extList = new ExtensionList;
-        $this->preCheck($status, $extList);
+        $this->preCheck($result, $extList);
         if ($extList === []) {
-            return $status;
+            return $result;
         }
         $this->prepareDir();
 
@@ -54,13 +53,12 @@ class ExtensionGeneralPreparer extends ExtensionPreparerBase
                 $this->output->writeln("<error>Exception: {$e->getMessage()}</error>");
                 continue;
             }
-            $typeText = $instance->getTypeText();
-            $this->extractTarball($dst, "{$this->dst}/$typeText");
-            $status->addSuccess("$typeText-{$instance->getName()}");
+            $this->extractTarball($dst, "{$this->dst}/{$instance->getTypeTextWithS()}");
+            $result->addOkItem("{$instance->getTypeText()}-{$instance->getName()}");
             unlink($dst);
         }
 
-        return $status;
+        return $result;
     }
 
     /**

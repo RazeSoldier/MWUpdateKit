@@ -24,7 +24,6 @@ use RazeSoldier\MWUpKit\MediaWiki\{
     ExtensionInstance,
     ExtensionList
 };
-use RazeSoldier\MWUpKit\StatusValue;
 use Symfony\Component\Process\{
     Process,
     PhpExecutableFinder
@@ -36,13 +35,13 @@ use Symfony\Component\Process\{
  */
 class ExtensionGitPreparer extends ExtensionPreparerBase
 {
-    public function prepare() : StatusValue
+    public function prepare() : PrepareResult
     {
-        $status = new StatusValue;
+        $result = new PrepareResult;
         $extList = new ExtensionList;
-        $this->preCheck($status, $extList);
+        $this->preCheck($result, $extList);
         if ($extList === []) {
-            return $status;
+            return $result;
         }
         $this->prepareDir();
 
@@ -57,7 +56,7 @@ class ExtensionGitPreparer extends ExtensionPreparerBase
             }
             if ($res->getExitCode() !== 0) {
                 $this->output->writeln("<error>{$res->getErrorOutput()}</error>");
-                $status->addFail("{$instance->getTypeText()}-{$instance->getName()}");
+                $result->addFailItem("{$instance->getTypeText()}-{$instance->getName()}");
                 continue;
             }
 
@@ -65,10 +64,11 @@ class ExtensionGitPreparer extends ExtensionPreparerBase
                 $this->installDepend("$pathPrefix/{$instance->getName()}");
             } catch (\RuntimeException $e) {
                 $this->output->writeln("<error>{$e->getMessage()}</error>");
-                $status->addFail("{$instance->getTypeText()}-{$instance->getName()}");
+                $result->addFailItem("{$instance->getTypeText()}-{$instance->getName()}");
             }
+            $result->addOkItem("{$instance->getTypeText()}-{$instance->getName()}");
         }
-        return $status;
+        return $result;
     }
 
     private function doGitClone(string $repoName, string $branch, string $cwd, string $type) : Process

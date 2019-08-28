@@ -25,7 +25,6 @@ use RazeSoldier\MWUpKit\MediaWiki\{
     MediaWikiInstance,
     MWVersion
 };
-use RazeSoldier\MWUpKit\StatusValue;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -84,19 +83,22 @@ abstract class ExtensionPreparerBase implements IExtensionPreparer
         }
     }
 
-    protected function preCheck(StatusValue $status, ExtensionList &$list)
+    /**
+     * Check if the extension code is hosted on WMF-gerrit and filter
+     * @param PrepareResult $result
+     * @param ExtensionList $list
+     */
+    protected function preCheck(PrepareResult $result, ExtensionList $list)
     {
         foreach ($this->getExtList() as $ext) {
             if ($ext->isHostWMF()) {
                 $list[] = $ext;
             } else {
-                $text = substr($ext->getTypeText(), 0, -1);
+                $text = $ext->getTypeText();
                 $this->output->writeln("<comment>'{$ext->getName()}' $text not hosting WMF-gerrit, ignore</comment>");
-                $status->addFail("{$ext->getTypeText()}-{$ext->getName()}");
+                $result->addFailItem("{$ext->getTypeText()}-{$ext->getName()}",
+                    "'{$ext->getName()}' $text not hosting WMF-gerrit, ignore");
             }
-        }
-        if ($list === []) {
-            $status->warning('Nothing needs to be prepared');
         }
     }
 

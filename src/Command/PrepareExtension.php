@@ -20,11 +20,10 @@
 
 namespace RazeSoldier\MWUpKit\Command;
 
-use RazeSoldier\MWUpKit\MediaWiki\{
-    MediaWikiInstance,
+use RazeSoldier\MWUpKit\MediaWiki\{MediaWikiInstance,
     MWVersion,
-    Preparer\ExtensionPreparerFactory
-};
+    Preparer\ExtensionPreparerFactory,
+    Preparer\PrepareResult};
 use RazeSoldier\MWUpKit\Services;
 use Symfony\Component\Console\{
     Command\Command,
@@ -73,38 +72,40 @@ class PrepareExtension extends Command
         }
 
         $mwInstance = MediaWikiInstance::newByPath($input->getArgument('basePath'));
-        $status = ExtensionPreparerFactory::make($isGit, $mwInstance, new MWVersion($input->getArgument('version')),
+        $result = ExtensionPreparerFactory::make($isGit, $mwInstance, new MWVersion($input->getArgument('version')),
             $input->getArgument('dstPath'), $output)->prepare();
 
-        if ($status->getSuccessCount() === 0) {
-            foreach ($status->getErrorsByType('warning') as $value) {
-                $output->writeln("<comment>{$value['message']}</comment>");
-            }
-            return 1;
-        }
-        $ops = $status->getSuccess();
-        $okOps = [];
-        $failOps = [];
-        foreach ($ops as $name => $ok) {
-            if ($ok) {
-                $okOps[] = $name;
-            } else {
-                $failOps[] = $name;
-            }
+        if ($result->isAllFail()) {
+            $output->writeln('<comment>Unprepared extension:</comment>');
+            $this->outputFailMessage($output, $result);
+            $output->writeln("<comment>Nothing needs to be prepared</comment>");
+            return 0;
         }
 
-        if ($okOps !== []) {
+        $okItems = $result->getOkItem();
+
+        if ($okItems !== []) {
             $output->writeln('<info>Successfully prepared extension:</info>');
-            foreach ($okOps as $op) {
-                $output->writeln("<info>$op</info>");
+            foreach ($okItems as $item) {
+                $output->writeln("<info>$item</info>");
             }
         }
-        if ($failOps !== []) {
+        if ($result->hasFail()) {
             $output->writeln('<comment>Unprepared extension:</comment>');
-            foreach ($failOps as $op) {
-                $output->writeln("<comment>$op</comment>");
-            }
+            $this->outputFailMessage($output, $result);
         }
         return 0;
+    }
+
+    private function outputFailMessage(OutputInterface $output, PrepareResult $result)
+    {
+        $failItems = $result->getFailItem();
+        foreach ($failItems as $failItem) {
+            $msg = $failItem['name'];
+            if ($failItem['reason'] !== null) {
+                $msg .= " - {$failItem['reason']}";
+            }
+            $output->writeln("<comment>$msg</comment>");
+        }
     }
 }

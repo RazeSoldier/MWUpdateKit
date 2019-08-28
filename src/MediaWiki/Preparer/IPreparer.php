@@ -20,9 +20,7 @@
 
 namespace RazeSoldier\MWUpKit\MediaWiki\Preparer;
 
-use RazeSoldier\MWUpKit\StatusValue;
-
 interface IPreparer
 {
-    public function prepare() : StatusValue;
+    public function prepare() : PrepareResult;
 }
