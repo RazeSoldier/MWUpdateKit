@@ -39,6 +39,7 @@ final class Kernel
 
     public function __construct()
     {
+        cli_set_process_title('MWUpdateKit');
         set_error_handler(function ($severity, $message, $file, $line) {
             if (!(error_reporting() & $severity)) {
                 // This error code is not included in error_reporting
