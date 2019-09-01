@@ -45,7 +45,7 @@ class ExtensionGeneralPreparer extends ExtensionPreparerBase
 
         foreach ($extList as $instance) {
             $this->output->writeln("> Downloading {$instance->getName()} from extdist.wmflabs.org");
-            $link = $this->getDownloadLink($instance->getName(), $instance->getType(), $this->targetVersion->toBranch());
+            $link = $this->getDownloadLink($instance, $this->targetVersion->toBranch());
             $dst = sys_get_temp_dir() . '/' . uniqid('MediaWikiUp', true) . '.tar.gz';
             try {
                 $this->downloadTarball($link, $dst);
@@ -63,19 +63,19 @@ class ExtensionGeneralPreparer extends ExtensionPreparerBase
 
     /**
      * Get the download link from the API of mediawiki.org
-     * @param string $extName
-     * @param int $type
+     * @param ExtensionInstance $extName
      * @param string $branchName
      * @return string
      */
-    private function getDownloadLink(string $extName, int $type, string $branchName) : string
+    private function getDownloadLink(ExtensionInstance $ext, string $branchName) : string
     {
+        $extName = $ext->getName();
         $client = Services::getInstance()->getHttpClient();
         $url = 'https://www.mediawiki.org/w/api.php?action=query&list=extdistbranches&format=json&formatversion=2&';
-        $url .= $type === ExtensionInstance::TYPE_EXTENSION ? "edbexts=$extName" : "edbskins=$extName";
+        $url .= $ext->getType() === ExtensionInstance::TYPE_EXTENSION ? "edbexts=$extName" : "edbskins=$extName";
         $json = $client->GET($url)->getBody();
         $json = json_decode($json, true);
-        $typeText = ExtensionInstance::TYPE_TEXT[$type];
+        $typeText = $ext->getTypeTextWithS();
         return $json['query']['extdistbranches'][$typeText][$extName][$branchName];
     }
 
