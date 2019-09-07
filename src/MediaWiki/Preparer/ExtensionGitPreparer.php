@@ -24,10 +24,7 @@ use RazeSoldier\MWUpKit\MediaWiki\{
     ExtensionInstance,
     ExtensionList
 };
-use Symfony\Component\Process\{
-    Process,
-    PhpExecutableFinder
-};
+use Symfony\Component\Process\Process;
 
 /**
  * This preparer uses cloning feature of Git to prepare for the extension
