@@ -46,16 +46,23 @@ class ExtensionGeneralPreparer extends ExtensionPreparerBase
         foreach ($extList as $instance) {
             $this->output->writeln("> Downloading {$instance->getName()} from extdist.wmflabs.org");
             $link = $this->getDownloadLink($instance, $this->targetVersion->toBranch());
-            $dst = sys_get_temp_dir() . '/' . uniqid('MediaWikiUp', true) . '.tar.gz';
+            $tmpFilePath = sys_get_temp_dir() . '/' . uniqid('MediaWikiUp', true) . '.tar.gz';
             try {
-                $this->downloadTarball($link, $dst);
+                $this->downloadTarball($link, $tmpFilePath);
             } catch (\RuntimeException $e) {
                 $this->output->writeln("<error>Exception: {$e->getMessage()}</error>");
                 continue;
             }
-            $this->extractTarball($dst, "{$this->dst}/{$instance->getTypeTextWithS()}");
+            $this->extractTarball($tmpFilePath, "{$this->dst}/{$instance->getTypeTextWithS()}");
+            try {
+                $this->installDepend("{$this->dst}/{$instance->getTypeTextWithS()}/{$instance->getName()}");
+            } catch (\RuntimeException $e) {
+                $this->output->writeln("<error>{$e->getMessage()}</error>");
+                $result->addFailItem("{$instance->getTypeText()}-{$instance->getName()}");
+                continue;
+            }
             $result->addOkItem("{$instance->getTypeText()}-{$instance->getName()}");
-            unlink($dst);
+            unlink($tmpFilePath);
         }
 
         return $result;

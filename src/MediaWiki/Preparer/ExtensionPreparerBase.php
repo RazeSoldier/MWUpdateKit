@@ -26,6 +26,10 @@ use RazeSoldier\MWUpKit\MediaWiki\{
     MWVersion
 };
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Process\{
+    PhpExecutableFinder,
+    Process
+};
 
 /**
  * This class contains the common code for the two implementations.
@@ -108,5 +112,37 @@ abstract class ExtensionPreparerBase implements IExtensionPreparer
     private function getExtList() : ExtensionList
     {
         return new ExtensionList($this->mwInstance->getExtensionList()->getList() + $this->mwInstance->getSkinList()->getList());
+    }
+
+    /**
+     * Install dependence for the extension via Composer
+     * @param string $path Path to the extension
+     * @throws \RuntimeException
+     */
+    protected function installDepend(string $path)
+    {
+        // If composer.json doesn't exist or the composer.json doesn't contain "require" key,
+        // exit this method directly.
+        if (!is_readable("$path/composer.json")) {
+            return;
+        }
+        $json = file_get_contents("$path/composer.json");
+        $json = json_decode($json, true);
+        if (!isset($json['require'])) {
+            return;
+        }
+
+        // Check if Composer binary exists in the $PATH and use it if it exists,
+        // or use the build-in binary if it doesn't exists.
+        if ((new Process('composer'))->run() === 0) {
+            $process = new Process(['composer', 'install', '--no-dev'], $path, null, null, null);
+        } else {
+            $phpPath = (new PhpExecutableFinder)->find();
+            $composerPath = ROOT_PATH . '/vendor/bin/composer.phar';
+            $process = new Process([$phpPath, $composerPath, 'install', '--no-dev'], $path, null, null, null);
+        }
+        if ($process->run() !== 0) {
+            throw new \RuntimeException("Exception: {$process->getErrorOutput()}");
+        }
     }
 }

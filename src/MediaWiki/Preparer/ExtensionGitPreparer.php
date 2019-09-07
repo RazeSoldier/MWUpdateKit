@@ -79,36 +79,4 @@ class ExtensionGitPreparer extends ExtensionPreparerBase
         $process->run();
         return $process;
     }
-
-    /**
-     * Install dependence for the extension via Composer
-     * @param string $path Path to the extension
-     * @throws \RuntimeException
-     */
-    private function installDepend(string $path)
-    {
-        // If composer.json doesn't exist or the composer.json doesn't contain "require" key,
-        // exit this method directly.
-        if (!is_readable("$path/composer.json")) {
-            return;
-        }
-        $json = file_get_contents("$path/composer.json");
-        $json = json_decode($json, true);
-        if (!isset($json['require'])) {
-            return;
-        }
-
-        // Check if Composer binary exists in the $PATH and use it if it exists,
-        // or use the build-in binary if it doesn't exists.
-        if ((new Process('composer'))->run() === 0) {
-            $process = new Process(['composer', 'install', '--no-dev'], $path, null, null, null);
-        } else {
-            $phpPath = (new PhpExecutableFinder)->find();
-            $composerPath = ROOT_PATH . '/vendor/bin/composer.phar';
-            $process = new Process([$phpPath, $composerPath, 'install', '--no-dev'], $path, null, null, null);
-        }
-        if ($process->run() !== 0) {
-            throw new \RuntimeException("Exception: {$process->getErrorOutput()}");
-        }
-    }
 }
