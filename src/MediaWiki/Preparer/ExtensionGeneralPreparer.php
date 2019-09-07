@@ -70,7 +70,7 @@ class ExtensionGeneralPreparer extends ExtensionPreparerBase
 
     /**
      * Get the download link from the API of mediawiki.org
-     * @param ExtensionInstance $extName
+     * @param ExtensionInstance $ext
      * @param string $branchName
      * @return string
      */
