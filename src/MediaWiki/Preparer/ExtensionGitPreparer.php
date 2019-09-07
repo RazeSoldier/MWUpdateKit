@@ -65,6 +65,7 @@ class ExtensionGitPreparer extends ExtensionPreparerBase
             } catch (\RuntimeException $e) {
                 $this->output->writeln("<error>{$e->getMessage()}</error>");
                 $result->addFailItem("{$instance->getTypeText()}-{$instance->getName()}");
+                continue;
             }
             $result->addOkItem("{$instance->getTypeText()}-{$instance->getName()}");
         }
