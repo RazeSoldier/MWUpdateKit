@@ -46,6 +46,12 @@ class ExtensionGeneralPreparer extends ExtensionPreparerBase
         foreach ($extList as $instance) {
             $this->output->writeln("> Downloading {$instance->getName()} from extdist.wmflabs.org");
             $link = $this->getDownloadLink($instance, $this->targetVersion->toBranch());
+            if ($link === null) {
+                $this->output->writeln("<error>{$this->targetVersion->toBranch()->getBranchText()} for {$instance->getName()} " .
+                    "{$instance->getTypeText()} does not exists</error>");
+                $result->addFailItem("{$instance->getTypeText()}-{$instance->getName()}");
+                continue;
+            }
             $tmpFilePath = sys_get_temp_dir() . '/' . uniqid('MediaWikiUp', true) . '.tar.gz';
             try {
                 $this->downloadTarball($link, $tmpFilePath);
@@ -72,9 +78,9 @@ class ExtensionGeneralPreparer extends ExtensionPreparerBase
      * Get the download link from the API of mediawiki.org
      * @param ExtensionInstance $ext
      * @param string $branchName
-     * @return string
+     * @return string|null Returns the download link for the extension, return NULL if without link
      */
-    private function getDownloadLink(ExtensionInstance $ext, string $branchName) : string
+    private function getDownloadLink(ExtensionInstance $ext, string $branchName)
     {
         $extName = $ext->getName();
         $client = Services::getInstance()->getHttpClient();
@@ -83,7 +89,11 @@ class ExtensionGeneralPreparer extends ExtensionPreparerBase
         $json = $client->GET($url)->getBody();
         $json = json_decode($json, true);
         $typeText = $ext->getTypeTextWithS();
-        return $json['query']['extdistbranches'][$typeText][$extName][$branchName];
+        if (isset($json['query']['extdistbranches'][$typeText][$extName][$branchName])) {
+            return $json['query']['extdistbranches'][$typeText][$extName][$branchName];
+        } else {
+            return null;
+        }
     }
 
     /**
