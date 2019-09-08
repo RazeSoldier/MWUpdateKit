@@ -72,7 +72,7 @@ class MWBranch {
      * @throws \UnexpectedValueException
      */
     public static function parseBranchName(string $name) : self {
-        $hit = preg_match('/REL(?<major>[0-9])_(?<minor>[0-9]*)/', $name, $matches);
+        $hit = preg_match('/^REL(?<major>[0-9])_(?<minor>[0-9]*)$/', $name, $matches);
         if ($hit !== 1 || !isset($matches['major']) || !isset($matches['minor'])) {
             throw new \UnexpectedValueException("Invalid MW branch: $name");
         }
