@@ -22,6 +22,7 @@ namespace RazeSoldier\MWUpKit\MediaWiki\Preparer;
 
 use RazeSoldier\MWUpKit\{
     Exception\HttpTimeoutException,
+    Exception\ProcessExecException,
     MediaWiki\ExtensionInstance,
     MediaWiki\ExtensionList,
     Services
@@ -62,7 +63,7 @@ class ExtensionGeneralPreparer extends ExtensionPreparerBase
             $this->extractTarball($tmpFilePath, "{$this->dst}/{$instance->getTypeTextWithS()}");
             try {
                 $this->installDepend("{$this->dst}/{$instance->getTypeTextWithS()}/{$instance->getName()}");
-            } catch (\RuntimeException $e) {
+            } catch (ProcessExecException $e) {
                 $this->output->writeln("<error>{$e->getMessage()}</error>");
                 $result->addFailItem("{$instance->getTypeText()}-{$instance->getName()}");
                 continue;

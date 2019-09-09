@@ -25,6 +25,7 @@ use RazeSoldier\MWUpKit\MediaWiki\{
     MediaWikiInstance,
     MWVersion
 };
+use RazeSoldier\MWUpKit\Exception\ProcessExecException;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\{
     PhpExecutableFinder,
@@ -117,7 +118,7 @@ abstract class ExtensionPreparerBase implements IExtensionPreparer
     /**
      * Install dependence for the extension via Composer
      * @param string $path Path to the extension
-     * @throws \RuntimeException
+     * @throws ProcessExecException Exception thrown if the process exit code is not 0
      */
     protected function installDepend(string $path)
     {
@@ -142,7 +143,7 @@ abstract class ExtensionPreparerBase implements IExtensionPreparer
             $process = new Process([$phpPath, $composerPath, 'install', '--no-dev'], $path, null, null, null);
         }
         if ($process->run() !== 0) {
-            throw new \RuntimeException("Exception: {$process->getErrorOutput()}");
+            throw new ProcessExecException($process);
         }
     }
 }

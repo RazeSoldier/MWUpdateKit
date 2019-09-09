@@ -24,6 +24,7 @@ use RazeSoldier\MWUpKit\MediaWiki\{
     ExtensionInstance,
     ExtensionList
 };
+use RazeSoldier\MWUpKit\Exception\ProcessExecException;
 use Symfony\Component\Process\Process;
 
 /**
@@ -59,7 +60,7 @@ class ExtensionGitPreparer extends ExtensionPreparerBase
 
             try {
                 $this->installDepend("$pathPrefix/{$instance->getName()}");
-            } catch (\RuntimeException $e) {
+            } catch (ProcessExecException $e) {
                 $this->output->writeln("<error>{$e->getMessage()}</error>");
                 $result->addFailItem("{$instance->getTypeText()}-{$instance->getName()}");
                 continue;
