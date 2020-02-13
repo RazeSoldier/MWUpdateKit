@@ -27,6 +27,7 @@ use RazeSoldier\MWUpKit\{
     MediaWiki\ExtensionList,
     Services
 };
+use Symfony\Component\Process\Exception\RuntimeException;
 
 /**
  * This preparer downloads the tarball directly from the Internet to prepare for the extension
@@ -34,6 +35,10 @@ use RazeSoldier\MWUpKit\{
  */
 class ExtensionGeneralPreparer extends ExtensionPreparerBase
 {
+    /**
+     * @return PrepareResult
+     * @throws \RuntimeException Exception thrown if the extension/skin directory already exist
+     */
     public function prepare() : PrepareResult
     {
         $result = new PrepareResult;
@@ -64,6 +69,10 @@ class ExtensionGeneralPreparer extends ExtensionPreparerBase
             try {
                 $this->installDepend("{$this->dst}/{$instance->getTypeTextWithS()}/{$instance->getName()}");
             } catch (ProcessExecException $e) {
+                $this->output->writeln("<error>{$e->getMessage()}</error>");
+                $result->addFailItem("{$instance->getTypeText()}-{$instance->getName()}");
+                continue;
+            } catch (RuntimeException $e) {
                 $this->output->writeln("<error>{$e->getMessage()}</error>");
                 $result->addFailItem("{$instance->getTypeText()}-{$instance->getName()}");
                 continue;

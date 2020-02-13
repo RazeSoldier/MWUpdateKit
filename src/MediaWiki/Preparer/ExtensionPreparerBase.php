@@ -68,17 +68,17 @@ abstract class ExtensionPreparerBase implements IExtensionPreparer
 
     /**
      * Prepare directories for storing extensions
-     * @throws \Exception
+     * @throws \RuntimeException Exception thrown if the extension/skin directory already exist
      */
     protected function prepareDir()
     {
         if (file_exists($this->dst)) {
             if (file_exists("{$this->dst}/extensions")) {
-                throw new \Exception("{$this->dst}/extensions already exist");
+                throw new \RuntimeException("{$this->dst}/extensions already exist");
             }
             mkdir("{$this->dst}/extensions", 0775);
             if (file_exists("{$this->dst}/skins")) {
-                throw new \Exception("{$this->dst}/skins already exist");
+                throw new \RuntimeException("{$this->dst}/skins already exist");
             }
             mkdir("{$this->dst}/skins", 0775);
         } else {
@@ -119,6 +119,7 @@ abstract class ExtensionPreparerBase implements IExtensionPreparer
      * Install dependence for the extension via Composer
      * @param string $path Path to the extension
      * @throws ProcessExecException Exception thrown if the process exit code is not 0
+     * @throws \Symfony\Component\Process\Exception\RuntimeException
      */
     protected function installDepend(string $path)
     {

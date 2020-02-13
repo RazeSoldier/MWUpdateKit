@@ -24,6 +24,7 @@ use RazeSoldier\MWUpKit\MediaWiki\{MediaWikiInstance,
     MWVersion,
     Preparer\ExtensionPreparerFactory,
     Preparer\PrepareResult};
+use RazeSoldier\MWUpKit\Exception\FileAccessException;
 use RazeSoldier\MWUpKit\Services;
 use Symfony\Component\Console\{
     Command\Command,
@@ -56,6 +57,14 @@ class PrepareExtension extends Command
             ->addOption('proxy', null, InputOption::VALUE_REQUIRED, 'Set HTTP proxy');
     }
 
+    /**
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @return int|null
+     * @throws \RuntimeException Exception thrown if the extension/skin directory already exist
+     * @throws \UnexpectedValueException Exception thrown if the given version is invalid
+     * @throws FileAccessException
+     */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         if ($input->getOption('proxy') !== null) {

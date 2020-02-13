@@ -22,5 +22,9 @@ namespace RazeSoldier\MWUpKit\MediaWiki\Preparer;
 
 interface IPreparer
 {
+    /**
+     * @return PrepareResult
+     * @throws \RuntimeException Exception thrown if the extension/skin directory already exist
+     */
     public function prepare() : PrepareResult;
 }

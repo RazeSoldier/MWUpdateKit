@@ -48,6 +48,13 @@ class MediaWikiInstance
      */
     private $skinList;
 
+    /**
+     * @param string $path
+     * @throws FileAccessException Exception thrown if failed to read the file
+     * @throws \UnexpectedValueException Exception thrown if failed to catch the MediaWiki version
+     * @throws \UnexpectedValueException Exception thrown if the MediaWiki version is invalid
+     * @throws \UnexpectedValueException Exception thrown if failed to open the extension directory
+     */
     private function __construct(string $path)
     {
         $this->basePath = $path;
@@ -59,19 +66,28 @@ class MediaWikiInstance
      * Instantiate based on file path
      * @param string $path
      * @return MediaWikiInstance
+     * @throws FileAccessException Exception thrown if failed to read the file
+     * @throws \UnexpectedValueException Exception thrown if failed to catch the MediaWiki version
+     * @throws \UnexpectedValueException Exception thrown if the MediaWiki version is invalid
+     * @throws \UnexpectedValueException Exception thrown if failed to open the extension directory
+     * @throws \UnexpectedValueException Exception thrown if $path does not exist
+     * @throws \UnexpectedValueException Exception thrown if $path is not a valid MediaWiki installation directory
      */
     public static function newByPath(string $path) : self
     {
         $realPath = realpath($path);
         if ($realPath === false) {
-            throw new \InvalidArgumentException("$path does not exist");
+            throw new \UnexpectedValueException("$path does not exist");
         }
         if (!self::isValid($realPath)) {
-            throw new \InvalidArgumentException("$path is not a valid MediaWiki installation directory");
+            throw new \UnexpectedValueException("$path is not a valid MediaWiki installation directory");
         }
         return new self($realPath);
     }
 
+    /**
+     * @throws \UnexpectedValueException Exception thrown if failed to open the extension directory
+     */
     private function parseExtension()
     {
         $extDir = new \DirectoryIterator("{$this->basePath}/extensions");
@@ -130,7 +146,9 @@ class MediaWikiInstance
      * Catch the MediaWiki version from file
      * @param string $filePath
      * @return MWVersion
-     * @throws FileAccessException
+     * @throws FileAccessException Exception thrown if failed to read the file
+     * @throws \UnexpectedValueException Exception thrown if failed to catch the MediaWiki version
+     * @throws \UnexpectedValueException Exception thrown if the MediaWiki version is invalid
      */
     public static function catchVersionFromFile(string $filePath) : MWVersion
     {
@@ -144,11 +162,13 @@ class MediaWikiInstance
      * Catch the MediaWiki version from text
      * @param string $text
      * @return MWVersion
+     * @throws \UnexpectedValueException Exception thrown if failed to catch the MediaWiki version
+     * @throws \UnexpectedValueException Exception thrown if the MediaWiki version is invalid
      */
     public static function catchVersionFromText(string $text) : MWVersion
     {
         if (!preg_match('/\$wgVersion\s=\s\'(?<version>.*?)\';/', $text, $matches)) {
-            throw new \InvalidArgumentException('Failed to catch the MediaWiki version');
+            throw new \UnexpectedValueException('Failed to catch the MediaWiki version');
         }
         return new MWVersion($matches['version']);
     }
