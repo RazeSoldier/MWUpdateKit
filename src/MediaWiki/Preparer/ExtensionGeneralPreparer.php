@@ -51,7 +51,17 @@ class ExtensionGeneralPreparer extends ExtensionPreparerBase
 
         foreach ($extList as $instance) {
             $this->output->writeln("> Downloading {$instance->getName()} from extdist.wmflabs.org");
-            $link = $this->getDownloadLink($instance, $this->targetVersion->toBranch());
+            try {
+                $link = $this->getDownloadLink($instance, $this->targetVersion->toBranch());
+            } catch (\ErrorException $e) {
+                // Quick exit because curl extension not loaded
+                $this->output->writeln("<error>{$e->getMessage()}</error>");
+                exit(1);
+            } catch (\RuntimeException $e) {
+                $this->output->writeln("<error>{$e->getMessage()}</error>");
+                $result->addFailItem("{$instance->getTypeText()}-{$instance->getName()}");
+                continue;
+            }
             if ($link === null) {
                 $this->output->writeln("<error>{$this->targetVersion->toBranch()->getBranchText()} for {$instance->getName()} " .
                     "{$instance->getTypeText()} does not exists</error>");
@@ -89,6 +99,8 @@ class ExtensionGeneralPreparer extends ExtensionPreparerBase
      * @param ExtensionInstance $ext
      * @param string $branchName
      * @return string|null Returns the download link for the extension, return NULL if without link
+     * @throws \RuntimeException Exception thrown if receive non-200 response and retry stills fails
+     * @throws \ErrorException Exception thrown if unload curl extension
      */
     private function getDownloadLink(ExtensionInstance $ext, string $branchName)
     {
@@ -96,8 +108,16 @@ class ExtensionGeneralPreparer extends ExtensionPreparerBase
         $client = Services::getInstance()->getHttpClient();
         $url = 'https://www.mediawiki.org/w/api.php?action=query&list=extdistbranches&format=json&formatversion=2&';
         $url .= $ext->getType() === ExtensionInstance::TYPE_EXTENSION ? "edbexts=$extName" : "edbskins=$extName";
-        $json = $client->GET($url)->getBody();
-        $json = json_decode($json, true);
+
+        $retryTime = -1;
+        do {
+            ++$retryTime;
+            if ($retryTime === 3) {
+                throw new \RuntimeException("Failed to GET $url, we already retry 3 times and stills fails");
+            }
+            $resp = $client->GET($url);
+        } while ($resp !== 200);
+        $json = json_decode($resp->getBody(), true);
         $typeText = $ext->getTypeTextWithS();
         if (isset($json['query']['extdistbranches'][$typeText][$extName][$branchName])) {
             return $json['query']['extdistbranches'][$typeText][$extName][$branchName];
