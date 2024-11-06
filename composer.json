@@ -5,7 +5,7 @@
   "license": "GPL-2.0-or-later",
   "require": {
     "php": ">=7.0.8",
-    "symfony/process": "^3.4",
+    "symfony/process": "^5.4",
     "symfony/console": "^3.4",
     "php-curl-class/php-curl-class": "^8.6",
     "ext-json": "*"
